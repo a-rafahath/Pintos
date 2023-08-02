@@ -38,8 +38,11 @@ process_execute (const char *file_name)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
 
-  /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+  /* Create a new thread to execute command. */
+  // Parse commands from input
+  char* char_pointer = NULL;
+  char* tok = strtok_r(file_name, " ", &char_pointer);
+  tid = thread_create (tok, PRI_DEFAULT, start_process, fn_copy);
 
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
@@ -61,10 +64,10 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
 
+  // Parse commands from input
   char* char_pointer = NULL;
   char* tok = strtok_r(file_name, " ", &char_pointer);
   success = load (tok, &if_.eip, &if_.esp);
-  //success = load (file_name, &if_.eip, &if_.esp);
   
   /* If load failed, quit. */
   palloc_free_page (file_name);
@@ -122,6 +125,8 @@ process_exit (void)
       pagedir_activate (NULL);
       pagedir_destroy (pd);
     }
+  // Print process exit message with the exit code from thread
+  printf("%s: exit(%d)\n", cur->name, cur->exit_code);
 }
 
 /* Sets up the CPU for running user code in the current
