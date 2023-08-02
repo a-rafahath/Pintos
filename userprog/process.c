@@ -61,7 +61,10 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
 
-  success = load (file_name, &if_.eip, &if_.esp);
+  char* char_pointer = NULL;
+  char* tok = strtok_r(file_name, " ", &char_pointer);
+  success = load (tok, &if_.eip, &if_.esp);
+  //success = load (file_name, &if_.eip, &if_.esp);
   
   /* If load failed, quit. */
   palloc_free_page (file_name);
